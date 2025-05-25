@@ -15,20 +15,16 @@ function App() {
   const { user, isLoading } = useUserStore();
 
   useEffect(() => {
+    // Restore session on app load
     supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session?.user) {
-        useUserStore.setState({ user: session.user, isLoading: false });
-      } else {
-        useUserStore.setState({ user: null, isLoading: false });
-      }
+      console.log('Initial session:', session); // Optional debug
+      useUserStore.setState({ user: session?.user ?? null, isLoading: false });
     });
 
+    // Listen for login/logout/session changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (session?.user) {
-        useUserStore.setState({ user: session.user, isLoading: false });
-      } else {
-        useUserStore.setState({ user: null, isLoading: false });
-      }
+      console.log('Auth state changed:', session); // Optional debug
+      useUserStore.setState({ user: session?.user ?? null, isLoading: false });
     });
 
     return () => subscription.unsubscribe();
@@ -36,27 +32,4 @@ function App() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600"></div>
-      </div>
-    );
-  }
-
-  return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/auth" element={!user ? <AuthPage /> : <Navigate to="/" />} />
-        <Route path="/onboarding" element={user ? <OnboardingPage /> : <Navigate to="/auth" />} />
-        <Route path="/strava/callback" element={user ? <StravaCallbackPage /> : <Navigate to="/auth" />} />
-        <Route path="/subscription" element={user ? <SubscriptionPage /> : <Navigate to="/auth" />} />
-        <Route path="/subscription/success" element={user ? <SubscriptionSuccessPage /> : <Navigate to="/auth" />} />
-        <Route path="/" element={user ? <AppLayout /> : <Navigate to="/auth" />}>
-          <Route index element={<DashboardPage />} />
-          <Route path="calendar" element={<CalendarPage />} />
-        </Route>
-      </Routes>
-    </BrowserRouter>
-  );
-}
-
-export default App;
+      <div className="min-h-scree
